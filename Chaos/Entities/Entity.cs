@@ -9,7 +9,6 @@ namespace Chaos
         //Parent features
         public List<Entity> Neighbours;
 
-
         //allies features
         public Entity Parent;
 
@@ -26,13 +25,29 @@ namespace Chaos
         //The position in the world
         public Vector Position;
 
-        //
+        //Radios of the area that this entity has
         public double Power;
 
         //This inlists all close-by entities and its relationship between them.
         public Environment Environment;
 
-        //This is iver written by user defined function that tell the entity what to do in sertain situations.
+        //These function pointters are user defined function that tells the entity what to do in sertain situations.
+        //The behaviour of the entity during a event
         public Action<Entity, Event, World> Event_Handler;
+
+        //Use case: if (a.Governs(b)) {..}
+        //Calculate if another entity is inside this entity
+        public bool Governs(Entity entity)
+        {
+            double delta_x = entity.Position.X - Position.X;
+            double delta_y = entity.Position.Y - Position.Y;
+            double delta_z = entity.Position.Z - Position.Z;
+            double Distance = Math.Sqrt(delta_x * delta_x + delta_y * delta_y + delta_z * delta_z);
+
+            //If the distance between this entity and the other is greater than the governed radius, then return false. If not then, return true
+            return Distance < Power;
+        }
+
+
     }
 }
