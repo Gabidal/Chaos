@@ -10,6 +10,8 @@ namespace Chaos
         public double Y;
         public double Z;
 
+        public double Length => Math.Sqrt(X * X + Y * Y + Z * Z);
+
         /// <summary>
         /// Sets the values of the components equal to the specified value.
         /// </summary>
@@ -28,6 +30,26 @@ namespace Chaos
             X = x;
             Y = y;
             Z = z;
+        }
+
+        public static Vector operator+(Vector a, Vector b)
+        {
+            return new Vector(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        }
+
+        public static Vector operator -(Vector a, Vector b)
+        {
+            return new Vector(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        }
+
+        public Vector Normalized(double Lenght)
+        {
+            return new Vector(X / Length, Y / Length, Z / Length);
+        }
+
+        public static Vector operator *(Vector a, double b)
+        {
+            return new Vector(a.X * b, a.Y * b, a.Z * b);
         }
     }
 }

@@ -4,16 +4,26 @@ using System.Text;
 
 namespace Chaos
 {
+    class Relation
+    {
+        public Entity Friend;
+
+        public double Relationship; // -1..1
+
+        public Relation(Entity entity, double relationship = 0)
+        {
+            Friend = entity;
+            Relationship = relationship;
+        }
+    }
+
     class Environment
     {
         //Parent features
-        public List<Entity> Neighbours;
+        public List<Relation> Neighbours;
 
         //allies features
-        public Entity Parent;
-
-        //both
-        public double Relation; // -1..1
+        public Relation Parent;
 
         //If certain entity is inside power radious, it is count as non independent entity.
 
@@ -30,6 +40,9 @@ namespace Chaos
 
         //This inlists all close-by entities and its relationship between them.
         public Environment Environment;
+
+        //The movement speed.
+        public double Speed;
 
         //These function pointters are user defined function that tells the entity what to do in sertain situations.
         //The behaviour of the entity during a event
