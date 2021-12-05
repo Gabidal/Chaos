@@ -5,17 +5,6 @@ using System.Linq;
 
 namespace Chaos
 {
-    class Event : Entity
-    {
-        //The participating entities.
-        public List<Entity> Participants;
-
-        //The amount of power that is associated in this event.
-        public double Significance => Participants.Sum(i => i.Power);
-
-        //This describes how this event affects the relationships of the participants.
-        public double Grade;    //-1..1
-    }
 
     class Rule_Engine
     {
@@ -49,14 +38,19 @@ namespace Chaos
             return Distance;
         }
 
+        public double Get_Ratio(Entity a, Entity b)
+        {
+            return Math.Max(a.Power, b.Power) / Math.Min(a.Power, b.Power);
+        }
+
         public void List_All_Neihgbours(Entity entity, List<Entity> entities)
         {
             //Calculate first all the distances and then calculate the average
-            double Average = entities.Average(i => Get_Distance(i, entity));
+            double Average_Distance = entities.Average(i => Get_Distance(i, entity));
 
             //If the distance between this and the other entity is less than the average distance then,
             //the other entity is this entity's neighbour.
-            entity.Environment.Neighbours.AddRange(entities.Where(i => Get_Distance(i, entity) < Average).Select(i => new Relation(i)));
+            entity.Environment.Neighbours.AddRange(entities.Where(i => Get_Distance(i, entity) < Average_Distance).Select(i => new Relation(i)));
         }
 
         //rules
@@ -68,16 +62,26 @@ namespace Chaos
             double Dest_Y = 0;
             double Dest_Z = 0;
 
+
+            int Skipped_Neighbour_Count = 0;
             foreach (var i in entity.Environment.Neighbours)
             {
+                if (!(Get_Ratio(entity, i.Friend) > 1.33 && Get_Ratio(entity, i.Friend) < 2))
+                {
+                    Skipped_Neighbour_Count++;
+                    continue;
+                }
                 Dest_X += i.Friend.Position.X * i.Relationship;
                 Dest_Y += i.Friend.Position.Y * i.Relationship;
                 Dest_Z += i.Friend.Position.Z * i.Relationship;
             }
 
-            Dest_X /= entity.Environment.Neighbours.Count;
-            Dest_Y /= entity.Environment.Neighbours.Count;
-            Dest_Z /= entity.Environment.Neighbours.Count;
+            if (entity.Environment.Neighbours.Count - Skipped_Neighbour_Count == 0)
+                return;
+
+            Dest_X /= entity.Environment.Neighbours.Count - Skipped_Neighbour_Count;
+            Dest_Y /= entity.Environment.Neighbours.Count - Skipped_Neighbour_Count;
+            Dest_Z /= entity.Environment.Neighbours.Count - Skipped_Neighbour_Count;
 
             double Direction_X = Dest_X - entity.Position.X;
             double Direction_Y = Dest_Y - entity.Position.Y;
@@ -93,12 +97,20 @@ namespace Chaos
             entity.Position.Y += Distance_Y;
             entity.Position.Z += Distance_Z;
 
+            
+
             bool Collides = true;
             while (Collides)
             {
                 Collides = false;
                 foreach (var i in entity.Environment.Neighbours)
                 {
+                    if (!(Get_Ratio(entity, i.Friend) < 2))
+                    {
+                        Skipped_Neighbour_Count++;
+                        continue;
+                    }
+
                     Vector Direction = entity.Position - i.Friend.Position;
 
                     double Safe_Distance = entity.Power + i.Friend.Power;
@@ -113,9 +125,6 @@ namespace Chaos
                     }
                 }
             }
-            //Try being inside a bigger entities area-
-            //if this entity is twice as small as the bigger entity.
-
         }
     }
 }
