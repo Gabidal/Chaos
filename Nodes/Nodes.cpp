@@ -1,8 +1,7 @@
 #include "Nodes.h"
 #include "../Core/Core.h"
 
-extern Core* core;
-
+extern Core* Chaos_core;
 
 //The rules that all Handles follow:
 //Same size radius Handles get away from eachother.
@@ -21,16 +20,16 @@ void Handle_Chunk::Update(){
                     if (Handle_A->Radius == Handle_B->Radius){
                         //This means that the handles are either overlapping or same radius.
                         //So we need to move them away from eachother.
-                        Average_Velocity.X -= Handle_B->Location.X - Handle_A->Location.X;
-                        Average_Velocity.Y -= Handle_B->Location.Y - Handle_A->Location.Y;
-                        Average_Velocity.Z -= Handle_B->Location.Z - Handle_A->Location.Z;
+                        Average_Velocity.X -= Handle_B->Location->X - Handle_A->Location->X;
+                        Average_Velocity.Y -= Handle_B->Location->Y - Handle_A->Location->Y;
+                        Average_Velocity.Z -= Handle_B->Location->Z - Handle_A->Location->Z;
                     }
                     else if (Handle_A->Radius < Handle_B->Radius){
                         //This means that the Handle_A is smaller than Handle_B.
                         //So we need to move to the Handle_B.
-                        Average_Velocity.X += Handle_B->Location.X - Handle_A->Location.X;
-                        Average_Velocity.Y += Handle_B->Location.Y - Handle_A->Location.Y;
-                        Average_Velocity.Z += Handle_B->Location.Z - Handle_A->Location.Z;
+                        Average_Velocity.X += Handle_B->Location->X - Handle_A->Location->X;
+                        Average_Velocity.Y += Handle_B->Location->Y - Handle_A->Location->Y;
+                        Average_Velocity.Z += Handle_B->Location->Z - Handle_A->Location->Z;
                     }
                 }
             }
@@ -38,13 +37,17 @@ void Handle_Chunk::Update(){
 
         //Now we need to normalize the average velocity to the core->Update_Speed.
         float length = sqrt(pow(Average_Velocity.X, 2) + pow(Average_Velocity.Y, 2) + pow(Average_Velocity.Z, 2));
+        
+        if (length == 0)
+            continue;
+        
         Average_Velocity.X /= length;
         Average_Velocity.Y /= length;
         Average_Velocity.Z /= length;
 
-        Handle_A->Location.X += Average_Velocity.X * core->Update_Speed;
-        Handle_A->Location.Y += Average_Velocity.Y * core->Update_Speed;
-        Handle_A->Location.Z += Average_Velocity.Z * core->Update_Speed;
+        Handle_A->Location->X += Average_Velocity.X * Chaos_core->Update_Speed;
+        Handle_A->Location->Y += Average_Velocity.Y * Chaos_core->Update_Speed;
+        Handle_A->Location->Z += Average_Velocity.Z * Chaos_core->Update_Speed;
     }
 
 }

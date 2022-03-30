@@ -34,14 +34,14 @@ public:
     }
 
     //The user needs to call this functino for every Entity they have, and save them to theyr Entity objects as a member.
-    Chaos_Handle Get_New_Handle(Vector location, float radius){
+    Chaos_Handle* Get_New_Handle(Vector* location, float radius){
         Chaos_Handle* handle = new Chaos_Handle(radius);
         handle->Location = location;
         
         //This is for multithreading.
-        Get_Chunk(location)->Buffer.push_back(handle);
+        Get_Chunk(*location)->Buffer.push_back(handle);
 
-        return *handle;
+        return handle;
     }
 
     //This function will update the location of the Chaos handles.

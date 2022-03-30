@@ -1,7 +1,17 @@
 #include "Core/Core.h"
 
-Core* core;
+Core* Chaos_core;
 
-int main(){
-    
+#ifndef LIB
+int main() {
+
+}
+#endif
+
+void Chaos_Init(float speed) {
+	Chaos_core = new Core(speed);
+}
+
+void Chaos_Update() {
+	Chaos_core->Update();
 }

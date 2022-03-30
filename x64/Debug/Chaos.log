@@ -1,0 +1,10 @@
+﻿  Core.cpp
+  Include.cpp
+  main.cpp
+  Nodes.cpp
+C:\Users\Quanf\source\repos\Chaos\Nodes\Nodes.h(39,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data (compiling source file Include\Include.cpp)
+C:\Users\Quanf\source\repos\Chaos\Nodes\Nodes.h(39,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data (compiling source file Nodes\Nodes.cpp)
+C:\Users\Quanf\source\repos\Chaos\Nodes\Nodes.h(39,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data (compiling source file main.cpp)
+C:\Users\Quanf\source\repos\Chaos\Nodes\Nodes.h(39,24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data (compiling source file Core\Core.cpp)
+C:\Users\Quanf\source\repos\Chaos\Nodes\Nodes.cpp(39,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  Chaos.vcxproj -> C:\Users\Quanf\source\repos\Chaos\x64\Debug\Chaos.lib
