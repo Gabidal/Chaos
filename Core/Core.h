@@ -17,6 +17,9 @@ public:
 
     Core(float update_speed = 0.1f){
         Update_Speed = update_speed;
+
+		//This is mainly for testing
+        Buffer.insert({ "0,0", new Handle_Chunk() });
     }
 
     //Returns the chunk that is at the rigth locatino, so that the handle can be placed inside of it.
@@ -39,7 +42,8 @@ public:
         handle->Location = location;
         
         //This is for multithreading.
-        Get_Chunk(*location)->Buffer.push_back(handle);
+        //Get_Chunk(*location)->Buffer.push_back(handle);
+        Buffer["0,0"]->Buffer.push_back(handle);
 
         return handle;
     }
