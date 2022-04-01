@@ -26,10 +26,6 @@ int Chaos_Handle::State(Chaos_Handle* other) {
         //if the other node is inside of this node
         else if (other->Radius < Radius) {
             Result |= STATE::B_INSIDE_OF_A;
-			
-            //The node B is closer to the node A center than the B own radius.
-            if (distance < other->Radius)
-                Result |= STATE::DEAD_ZONE;
         }
 
     }
@@ -39,6 +35,10 @@ int Chaos_Handle::State(Chaos_Handle* other) {
     }
     //if the nodes are not overlapping
     else {
+        if (distance > Radius + other->Radius) {
+            Result |= STATE::FAR;
+        }
+
         Result |= STATE::NOT_OVERLAPPING;
     }
 
@@ -63,7 +63,7 @@ void Handle_Chunk::Update(){
                 int Result = Handle_A->State(Handle_B);
 
 				//if the Handle A is not inside of B
-                if (Chaos_Handle::is(Result, STATE::NOT_OVERLAPPING)) {
+                if (Chaos_Handle::is(Result, STATE::NOT_OVERLAPPING) && !Chaos_Handle::is(Result, STATE::FAR)) {
                     //if Handle A is smaller than B
                     if (Handle_A->Radius < Handle_B->Radius) {
                         //A goes towards B
@@ -84,14 +84,18 @@ void Handle_Chunk::Update(){
                 }
                 else if (Chaos_Handle::is(Result, STATE::A_INSIDE_OF_B)) {
                     if (Chaos_Handle::is(Result, STATE::DEAD_ZONE)) {
-                        *Average_Velocity -= *Handle_A->Location - *Handle_B->Location;
+                        *Average_Velocity -= *Handle_B->Location  - *Handle_A->Location;
                     }
                     else{
-                        *Average_Velocity += *Handle_A->Location - *Handle_B->Location;
+                        *Average_Velocity += *Handle_B->Location - *Handle_A->Location;
                     }
                 }
             }
         }
+
+        Vector Random_Nudge(CHAOS_UTILS::Rand(-10, 10), CHAOS_UTILS::Rand(-10, 10));
+
+        *Average_Velocity += Random_Nudge;
 
         //Update the Handle_A's position with the new normalized data
         Average_Velocity = Vector::Normalize(*Average_Velocity);
@@ -99,6 +103,12 @@ void Handle_Chunk::Update(){
         if (Average_Velocity == nullptr) {
             continue;
         }
+
+        if (*Vector::Abs(*Average_Velocity - *Handle_A->Previus_Location) <= Vector({ 1, 1, 1 })) {
+            *Average_Velocity *= -1;
+        }
+
+        Handle_A->Previus_Location = Average_Velocity;
 
         *Handle_A->Location += *Average_Velocity;
 
