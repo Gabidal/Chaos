@@ -9,10 +9,6 @@ using namespace std;
 
 constexpr int CHUNK_SIZE = 16;
 
-class banana {
-	
-};
-
 class Vector{
 public:
     float X;
@@ -80,8 +76,14 @@ namespace STATE {
     constexpr int NOT_OVERLAPPING       = 1 << 2;
     constexpr int SAME_RADIUS           = 1 << 3;
     constexpr int NECK_TO_NECK          = 1 << 4;
-    constexpr int DEAD_ZONE             = 1 << 5;
-    constexpr int FAR                   = 1 << 6;
+    constexpr int FAR                   = 1 << 5;
+
+    constexpr int NEW_CHILD             = 1 << 6;
+    constexpr int REMOVED_CHILD         = 1 << 7;
+
+    constexpr int NEW_NEIGHBOUR         = 1 << 8;
+    constexpr int REMOVED_NEIGHBOUR     = 1 << 9;
+    constexpr int CLOSE                 = 1 << 10;
 }
 
 //The external users will have to use this Chaos handle node as amember to their Entities.
@@ -90,18 +92,13 @@ public:
     float Radius;
     Vector* Location;
 
-    Vector* Objective;
-
-    Vector* Previus_Location;
-
     //Use themselfs addresses as keys
-    map<Chaos_Handle*, Chaos_Handle*> Childs;
+    map<const Chaos_Handle*, Chaos_Handle*> Childs;
+    map<const Chaos_Handle*, Chaos_Handle*> Neighbours;
 
     Chaos_Handle(float radius){
         Radius = radius;
 		Location = new Vector(0, 0, 0);
-        Previus_Location = new Vector(0, 0, 0);
-        Objective = nullptr;
     }
 	
     //This function checks if the value has the bitmask inside of it
@@ -116,6 +113,8 @@ public:
     //Thus function returns STATE::FAR if the two nodes are farther than their combined radius from each other.
     int State(Chaos_Handle* other);
 };
+
+typedef Vector* (*Chaos_Function_Handle)(Chaos_Handle* A, Chaos_Handle* B);
 
 class Handle_Chunk{
 public:

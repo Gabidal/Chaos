@@ -17,29 +17,71 @@ int Chaos_Handle::State(Chaos_Handle* other) {
         }
         //if this node is inside of the other node
         if (Radius < other->Radius) {
-            Result |= STATE::A_INSIDE_OF_B;
-			
-            //The node A is closer to the node B center than the A own radius.
-            if (distance < Radius)
-                Result |= STATE::DEAD_ZONE;
+            if (abs(Radius + distance - other->Radius) <= 1) {
+                Result |= STATE::A_INSIDE_OF_B;
+            }
         }
         //if the other node is inside of this node
         else if (other->Radius < Radius) {
             Result |= STATE::B_INSIDE_OF_A;
+
+            //If the smaller handle is not already inside of the bigger one, then add it to it.
+            if (Childs.find(other) == Childs.end()) {
+
+                //If the new child has been a neighbour then remove it.
+                if (Neighbours.find(other) != Neighbours.end()) {
+                    Neighbours.erase(other);
+
+                    Result |= STATE::REMOVED_NEIGHBOUR;
+                }
+
+                Childs.emplace(other, other);
+
+                Result |= STATE::NEW_CHILD;
+            }
         }
 
     }
     //if both Nodes are neck to neck
     else if (abs(distance - (Radius + other->Radius)) <= Accuracity) {
         Result |= STATE::NECK_TO_NECK;
+
+        //If the smaller handle is not already inside of the bigger one, then add it to it.
+        if (Neighbours.find(other) == Neighbours.end()) {
+
+            //If the new child has been a neighbour then remove it.
+            if (Childs.find(other) != Childs.end()) {
+                Childs.erase(other);
+
+                Result |= STATE::REMOVED_CHILD;
+            }
+
+            Neighbours.emplace(other, other);
+
+            Result |= STATE::NEW_NEIGHBOUR;
+        }
     }
     //if the nodes are not overlapping
     else {
         if (distance > Radius + other->Radius) {
             Result |= STATE::FAR;
         }
+        else {
+            Result |= STATE::CLOSE;
+        }
 
         Result |= STATE::NOT_OVERLAPPING;
+
+        if (Neighbours.find(other) != Neighbours.end()) {
+            Neighbours.erase(other);
+
+            Result |= STATE::REMOVED_NEIGHBOUR;
+        }
+        else if (Childs.find(other) != Childs.end()) {
+            Childs.erase(other);
+
+            Result |= STATE::REMOVED_CHILD;
+        }
     }
 
     return Result;
@@ -60,42 +102,28 @@ void Handle_Chunk::Update(){
 
         for (auto Handle_B : Buffer){
             if (Handle_A != Handle_B){
-                int Result = Handle_A->State(Handle_B);
+                int state = Handle_A->State(Handle_B);
 
-				//if the Handle A is not inside of B
-                if (Chaos_Handle::is(Result, STATE::NOT_OVERLAPPING) && !Chaos_Handle::is(Result, STATE::FAR)) {
-                    //if Handle A is smaller than B
-                    if (Handle_A->Radius < Handle_B->Radius) {
-                        //A goes towards B
-                        *Average_Velocity += *Handle_B->Location - *Handle_A->Location;
-					}
-                }
-                else if (Chaos_Handle::is(Result, STATE::NECK_TO_NECK)) {
-					//Get away from the 
-                    *Average_Velocity -= *Handle_B->Location - *Handle_A->Location;
-                }
+                if (Chaos_core->Handlers.find(state) != Chaos_core->Handlers.end()) {
+                    Vector* Result = Chaos_core->Handlers[state](Handle_A, Handle_B);
 
-                //If B is inside of A, then insert B into A's children, for later on to calculate the Lagrient points.
-                if (Chaos_Handle::is(Result, STATE::B_INSIDE_OF_A)) {
-                    if (Handle_A->Childs.find(Handle_B) != Handle_A->Childs.end()) {
-                        //We use same address for keys also as the values
-                        Handle_A->Childs.insert({ Handle_B, Handle_B });
-                    }
+                    if (Result)
+                        *Average_Velocity += *Result;
                 }
-                else if (Chaos_Handle::is(Result, STATE::A_INSIDE_OF_B)) {
-                    if (Chaos_Handle::is(Result, STATE::DEAD_ZONE)) {
-                        *Average_Velocity -= *Handle_B->Location  - *Handle_A->Location;
-                    }
-                    else{
-                        *Average_Velocity += *Handle_B->Location - *Handle_A->Location;
+                else {
+                    for (auto i : Chaos_core->Handlers) {
+                        if (Chaos_Handle::is(state, i.first)) {
+                            Vector* Result = i.second(Handle_A, Handle_B);
+
+                            if (Result)
+                                *Average_Velocity += *Result;
+
+                            break;
+                        }
                     }
                 }
             }
         }
-
-        Vector Random_Nudge(CHAOS_UTILS::Rand(-10, 10), CHAOS_UTILS::Rand(-10, 10));
-
-        *Average_Velocity += Random_Nudge;
 
         //Update the Handle_A's position with the new normalized data
         Average_Velocity = Vector::Normalize(*Average_Velocity);
@@ -104,20 +132,8 @@ void Handle_Chunk::Update(){
             continue;
         }
 
-        if (*Vector::Abs(*Average_Velocity - *Handle_A->Previus_Location) <= Vector({ 1, 1, 1 })) {
-            *Average_Velocity *= -1;
-        }
-
-        Handle_A->Previus_Location = Average_Velocity;
-
         *Handle_A->Location += *Average_Velocity;
-
-        //If the handle has an objective
-        if (Handle_A->Objective)
-            //go a little towards the objective
-            *Handle_A->Location += *Vector::Normalize(*Handle_A->Objective);
     }
-
 }
 
 Vector* Vector::Normalize(Vector other) {

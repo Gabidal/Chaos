@@ -8,8 +8,8 @@ int main() {
 }
 #endif
 
-void Chaos_Init(float speed) {
-	Chaos_core = new Core(speed);
+void Chaos_Init(map<int, Chaos_Function_Handle> handlers, float speed) {
+	Chaos_core = new Core(handlers, speed);
 }
 
 void Chaos_Update() {

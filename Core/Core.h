@@ -12,14 +12,18 @@ class Core{
 public:
     map<string, Handle_Chunk*> Buffer;
 
+    map<int, Chaos_Function_Handle> Handlers;
+
     //This determines how much of the result of the Chaos handles move each update frame. 
     float Update_Speed;
-
-    Core(float update_speed = 0.1f){
+    
+    Core(map<int, Chaos_Function_Handle> handlers, float update_speed = 0.1f){
         Update_Speed = update_speed;
 
 		//This is mainly for testing
         Buffer.insert({ "0,0", new Handle_Chunk() });
+
+        Handlers = handlers;
     }
 
     //Returns the chunk that is at the rigth locatino, so that the handle can be placed inside of it.

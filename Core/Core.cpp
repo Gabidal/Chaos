@@ -1,7 +1,7 @@
 #include "Core.h"
 
 void Core::Update(){
-    for (auto chunk : Buffer){
+    for (auto& chunk : Buffer){
         chunk.second->Update();
     }
 }
