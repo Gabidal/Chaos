@@ -16,7 +16,7 @@ int Chaos_Handle::State(Chaos_Handle* other) {
             Result |= STATE::SAME_RADIUS;
         }
         //if this node is inside of the other node
-        if (Radius < other->Radius) {
+        else if (Radius < other->Radius) {
             if (abs(Radius + distance - other->Radius) <= 1) {
                 Result |= STATE::A_INSIDE_OF_B;
             }
@@ -47,19 +47,19 @@ int Chaos_Handle::State(Chaos_Handle* other) {
         Result |= STATE::NECK_TO_NECK;
 
         //If the smaller handle is not already inside of the bigger one, then add it to it.
-        if (Neighbours.find(other) == Neighbours.end()) {
+        //if (Neighbours.find(other) == Neighbours.end()) {
 
-            //If the new child has been a neighbour then remove it.
-            if (Childs.find(other) != Childs.end()) {
-                Childs.erase(other);
+        //    //If the new child has been a neighbour then remove it.
+        //    if (Childs.find(other) != Childs.end()) {
+        //        Childs.erase(other);
 
-                Result |= STATE::REMOVED_CHILD;
-            }
+        //        Result |= STATE::REMOVED_CHILD;
+        //    }
 
-            Neighbours.emplace(other, other);
+        //    Neighbours.emplace(other, other);
 
-            Result |= STATE::NEW_NEIGHBOUR;
-        }
+        //    Result |= STATE::NEW_NEIGHBOUR;
+        //}
     }
     //if the nodes are not overlapping
     else {
@@ -72,16 +72,16 @@ int Chaos_Handle::State(Chaos_Handle* other) {
 
         Result |= STATE::NOT_OVERLAPPING;
 
-        if (Neighbours.find(other) != Neighbours.end()) {
-            Neighbours.erase(other);
+        //if (Neighbours.find(other) != Neighbours.end()) {
+        //    Neighbours.erase(other);
 
-            Result |= STATE::REMOVED_NEIGHBOUR;
-        }
-        else if (Childs.find(other) != Childs.end()) {
-            Childs.erase(other);
+        //    Result |= STATE::REMOVED_NEIGHBOUR;
+        //}
+        //else if (Childs.find(other) != Childs.end()) {
+        //    Childs.erase(other);
 
-            Result |= STATE::REMOVED_CHILD;
-        }
+        //    Result |= STATE::REMOVED_CHILD;
+        //}
     }
 
     return Result;
