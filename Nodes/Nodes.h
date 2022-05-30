@@ -15,6 +15,8 @@ public:
     float Y;
     float Z;
 
+    Vector(){}
+
     Vector(float x, float y, float z = 0){
         X = x;
         Y = y;
@@ -57,6 +59,10 @@ public:
         Result->Z = abs(Result->Z);
 
         return Result;
+    }
+
+    static float Distance(Vector other) {
+		return sqrt(pow(other.X, 2) + pow(other.Y, 2) + pow(other.Z, 2));
     }
 };
 
@@ -116,11 +122,17 @@ public:
 
 typedef Vector* (*Chaos_Function_Handle)(Chaos_Handle* A, Chaos_Handle* B);
 
-class Handle_Chunk{
+class Point{
 public:
-    vector<Chaos_Handle*> Buffer;
+    Vector Location;
 
-    Handle_Chunk(){}
+    vector<Chaos_Handle*> Handles;
+
+    float Max_Radius = 0;
+
+    Point(Vector L) : Location(L) {}
+
+    Point(Vector L, vector<Chaos_Handle*> H, float R): Location(L), Handles(H), Max_Radius(R) {};
 
     void Update();
 };

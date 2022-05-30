@@ -10,7 +10,7 @@ using namespace std;
 
 class Core{
 public:
-    map<string, Handle_Chunk*> Buffer;
+    vector<Point*> Buffer;
 
     map<int, Chaos_Function_Handle> Handlers;
 
@@ -21,23 +21,30 @@ public:
         Update_Speed = update_speed;
 
 		//This is mainly for testing
-        Buffer.insert({ "0,0", new Handle_Chunk() });
+        //Buffer.insert({ "0,0", new Point() });
 
         Handlers = handlers;
     }
 
     //Returns the chunk that is at the rigth locatino, so that the handle can be placed inside of it.
-    Handle_Chunk* Get_Chunk(Vector location){
-        int chunk_x = (int)location.X / CHUNK_SIZE;
-        int chunk_y = (int)location.Y / CHUNK_SIZE;
+    Point* Get_Point(Vector location, float radius){
+        
+        for (auto& p : Buffer) {
+        
+            //check is the point is in the radius of the point
+			if (p->Location.Distance(location) < radius) {
+				return p;
+			}
 
-        string key = to_string(chunk_x) + "," + to_string(chunk_y);
-
-        if (Buffer.find(key) == Buffer.end()){
-            Buffer[key] = new Handle_Chunk();
         }
 
-        return Buffer[key];
+		//If the point is not in the buffer, create a new one.
+		Point* New_Point = new Point(location);
+        New_Point->Max_Radius = radius;
+		
+        Buffer.push_back(New_Point);
+
+		return Buffer.back();
     }
 
     //The user needs to call this functino for every Entity they have, and save them to theyr Entity objects as a member.
@@ -46,8 +53,14 @@ public:
         handle->Location = location;
         
         //This is for multithreading.
-        //Get_Chunk(*location)->Buffer.push_back(handle);
-        Buffer["0,0"]->Buffer.push_back(handle);
+        Point* p = Get_Point(*location, radius);
+
+        if (p->Max_Radius < handle->Radius) {
+            p->Max_Radius = handle->Radius;
+        }
+
+		p->Handles.push_back(handle);
+        //Buffer["0,0"]->Buffer.push_back(handle);
 
         return handle;
     }

@@ -94,13 +94,13 @@ bool Chaos_Handle::is(int value, int bit_mask) {
 //The rules that all Handles follow:
 //Same size radius Handles get away from eachother.
 //Smaller radius Handles try to get inside a bigger radius Handle. 
-void Handle_Chunk::Update(){
+void Point::Update(){
 
-    for (auto Handle_A : Buffer){
+    for (auto Handle_A : Handles){
 
         Vector* Average_Velocity = new Vector(0, 0, 0);
 
-        for (auto Handle_B : Buffer){
+        for (auto Handle_B : Handles){
             if (Handle_A != Handle_B){
                 int state = Handle_A->State(Handle_B);
 
